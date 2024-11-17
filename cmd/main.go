@@ -1,28 +1,28 @@
 package main
 
 import (
-	"github.com/ProVitSer/tg-vrode-rabotaet-no/config"
-	"github.com/ProVitSer/tg-vrode-rabotaet-no/internal/server"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	tgstat "github.com/helios-ag/tgstat-go"
 	"log"
+
+	"github.com/ProVitSer/tg-vrode-rabotaet-no/config"
+	"github.com/ProVitSer/tg-vrode-rabotaet-no/internal/bot"
+	"github.com/ProVitSer/tg-vrode-rabotaet-no/internal/logger"
+	"github.com/ProVitSer/tg-vrode-rabotaet-no/internal/server"
+	tgstat_api "github.com/ProVitSer/tg-vrode-rabotaet-no/internal/tgstat-api"
+	tgstat "github.com/helios-ag/tgstat-go"
 )
 
 func main() {
 
-	config, err := config.LoadConfig()
-	if err != nil {
+	if err := config.LoadConfig(); err != nil {
 		log.Fatal(err)
 	}
 
-	tgstat.Token = config.TGStatToken
-
-	bot, err := tgbotapi.NewBotAPI(config.TelegramBotToken)
+	err := logger.InitLogger("output.log")
 	if err != nil {
-		log.Panic(err)
+		log.Fatalf("Ошибка инициализации логгера: %v\n", err)
 	}
 
-	bot.Debug = true
+	tgstat.Token = config.GlobalConfig.TGStatToken
 
 	go func() {
 		defer func() {
@@ -30,9 +30,23 @@ func main() {
 				log.Printf("Panic in server.StartServer: %v", r)
 			}
 		}()
-		server.StartServer(config.ExternServerId)
+		server.StartServer()
 
 	}()
+
+	b, err := bot.NewBot(config.GlobalConfig.TelegramBotToken)
+	if err != nil {
+		log.Fatalf("Ошибка инициализации бота: %v", err)
+	}
+
+	var _, e = tgstat_api.GetCallbackInfo()
+
+	if e != nil {
+
+		tgstat_api.SetCallbackSubscribeWord()
+	}
+
+	b.Start()
 
 	select {}
 }
