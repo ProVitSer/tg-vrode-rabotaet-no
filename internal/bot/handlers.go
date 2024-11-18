@@ -7,6 +7,11 @@ import (
 func (b *Bot) registerHandlers(mainMenu *telebot.ReplyMarkup, btnSearch, btnSubscribe, btnSubscriptions, btnUnsubscribe telebot.Btn, typeMenu *telebot.ReplyMarkup, btnChannel, btnChat, btnAll telebot.Btn) {
 
 	b.Bot.Handle("/start", func(c telebot.Context) error {
+		chatID := c.Chat().ID
+		err := b.saveChatID(chatID)
+		if err != nil {
+			return c.Send("Ошибка сохранения вашего чата. Попробуйте позже.")
+		}
 		return c.Send("Добро пожаловать! Выберите действие:", mainMenu)
 	})
 

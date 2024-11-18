@@ -23,3 +23,6 @@ go.work.sum
 
 # env file
 .env
+chat_ids.txt
+main
+output.log

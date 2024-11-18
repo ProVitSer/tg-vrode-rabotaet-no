@@ -13,6 +13,8 @@ import (
 
 func main() {
 
+	filePath := "chat_ids.txt"
+
 	if err := config.LoadConfig(); err != nil {
 		log.Fatal(err)
 	}
@@ -24,20 +26,20 @@ func main() {
 
 	tgstat.Token = config.GlobalConfig.TGStatToken
 
+	b, err := bot.NewBot(config.GlobalConfig.TelegramBotToken, filePath)
+	if err != nil {
+		log.Fatalf("Ошибка инициализации бота: %v", err)
+	}
+
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
 				log.Printf("Panic in server.StartServer: %v", r)
 			}
 		}()
-		server.StartServer()
+		server.StartServer(b)
 
 	}()
-
-	b, err := bot.NewBot(config.GlobalConfig.TelegramBotToken)
-	if err != nil {
-		log.Fatalf("Ошибка инициализации бота: %v", err)
-	}
 
 	var _, e = tgstat_api.GetCallbackInfo()
 
@@ -48,5 +50,4 @@ func main() {
 
 	b.Start()
 
-	select {}
 }
