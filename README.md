@@ -1,6 +1,6 @@
 Бот на скорую руку, для поиска публикаций по слову и подписка нужных публикаций
 
-Environment Variables
+.env
 
 ```
 TELEGRAM_BOT_TOKEN
